@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>제작 도구 소개 — 코드 보안 실습</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #008080; font-family: Tahoma, sans-serif; font-size: 12px; padding: 16px; }
+
+.window { border: 2px solid; border-color: #dfdfdf #808080 #808080 #dfdfdf; background: #d4d0c8; margin-bottom: 12px; max-width: 680px; margin-left: auto; margin-right: auto; }
+.titlebar { background: linear-gradient(to right, #0a246a, #a6caf0); padding: 3px 6px; display: flex; align-items: center; justify-content: space-between; }
+.tlabel { color: #fff; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+.tbtns { display: flex; gap: 2px; }
+.tbtn { width: 16px; height: 14px; font-size: 9px; border: 1px solid; border-color: #fff #808080 #808080 #fff; background: #d4d0c8; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; color: #000; }
+.winbody { padding: 16px; }
+
+/* 뒤로가기 버튼 */
+.back-btn { display: inline-flex; align-items: center; gap: 4px; background: #d4d0c8; border: 2px solid; border-color: #fff #808080 #808080 #fff; padding: 3px 10px; font-size: 11px; cursor: pointer; color: #000; text-decoration: none; margin-bottom: 14px; }
+.back-btn:hover { background: #e4e0d8; }
+.back-btn:active { border-color: #808080 #fff #fff #808080; }
+
+/* 섹션 제목 */
+.section-title { font-size: 13px; font-weight: bold; color: #000080; border-bottom: 1px solid #aaa; padding-bottom: 4px; margin-bottom: 10px; margin-top: 16px; }
+.section-title:first-of-type { margin-top: 0; }
+
+/* 도구 카드 */
+.tool-card { border: 2px solid; border-color: #fff #808080 #808080 #fff; background: #ece9d8; padding: 12px 14px; margin-bottom: 8px; }
+.tool-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.tool-icon { font-size: 24px; flex-shrink: 0; }
+.tool-name { font-size: 14px; font-weight: bold; color: #000080; }
+.tool-sub { font-size: 11px; color: #555; margin-top: 1px; }
+.tool-desc { font-size: 12px; color: #333; line-height: 1.7; margin-bottom: 8px; }
+.tool-divider { height: 1px; background: #aaa; margin: 8px 0; }
+
+/* 예시 코드 블록 */
+.code-block { background: #1e1e1e; border: 1px solid #808080; padding: 8px 10px; font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.7; margin-top: 6px; overflow-x: auto; }
+.c-tag  { color: #569cd6; }
+.c-attr { color: #9cdcfe; }
+.c-val  { color: #ce9178; }
+.c-prop { color: #9cdcfe; }
+.c-num  { color: #b5cea8; }
+.c-fn   { color: #dcdcaa; }
+.c-kw   { color: #c586c0; }
+.c-str  { color: #ce9178; }
+.c-cmt  { color: #6a9955; }
+.c-white{ color: #d4d4d4; }
+
+/* 역할 배지 */
+.role-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.role-badge { display: inline-block; padding: 2px 10px; font-size: 11px; border: 1px solid; }
+.rb-html { background: #fff0f0; border-color: #c00; color: #900; }
+.rb-css  { background: #f0f0ff; border-color: #00c; color: #009; }
+.rb-js   { background: #fffbe0; border-color: #990; color: #660; }
+
+/* 관계도 */
+.relation { display: flex; align-items: center; justify-content: center; gap: 0; margin: 12px 0; flex-wrap: wrap; }
+.rel-box { border: 2px solid; padding: 8px 14px; text-align: center; font-size: 12px; font-weight: bold; }
+.rel-html { border-color: #c00; background: #fff0f0; color: #900; }
+.rel-css  { border-color: #00c; background: #f0f0ff; color: #009; }
+.rel-js   { border-color: #990; background: #fffbe0; color: #660; }
+.rel-arrow { font-size: 18px; color: #666; padding: 0 6px; }
+.rel-result { border-color: #080; background: #f0fff0; color: #060; border: 2px solid #080; padding: 8px 14px; text-align: center; font-size: 12px; font-weight: bold; }
+
+/* 비유 표 */
+.table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.table th { background: #000080; color: #fff; padding: 4px 8px; text-align: left; font-weight: normal; }
+.table td { padding: 4px 8px; border-bottom: 1px solid #ccc; background: #ece9d8; }
+.table tr:nth-child(even) td { background: #f5f3ec; }
+
+/* 하단 */
+.footer { font-size: 11px; color: #666; text-align: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid #aaa; }
+</style>
+</head>
+<body>
+
+<div class="window">
+  <div class="titlebar">
+    <div class="tlabel">📖 제작 도구 소개 — 지뢰찾기 메모리 해킹 실습</div>
+    <div class="tbtns">
+      <div class="tbtn">_</div><div class="tbtn">□</div><div class="tbtn">✕</div>
+    </div>
+  </div>
+  <div class="winbody">
+
+    <a class="back-btn" href="index.html">◀ 메인으로 돌아가기</a>
+
+    <div class="section-title">이 프로그램은 3가지 언어로 만들었어요</div>
+
+    <div class="relation">
+      <div class="rel-box rel-html">HTML<br><span style="font-size:10px;font-weight:normal">뼈대</span></div>
+      <div class="rel-arrow">+</div>
+      <div class="rel-box rel-css">CSS<br><span style="font-size:10px;font-weight:normal">디자인</span></div>
+      <div class="rel-arrow">+</div>
+      <div class="rel-box rel-js">JavaScript<br><span style="font-size:10px;font-weight:normal">동작</span></div>
+      <div class="rel-arrow">=</div>
+      <div class="rel-result">💣 지뢰찾기<br><span style="font-size:10px;font-weight:normal">완성!</span></div>
+    </div>
+
+    <table class="table" style="margin-bottom:14px">
+      <thead><tr><th>언어</th><th>역할</th><th>건물 비유</th></tr></thead>
+      <tbody>
+        <tr><td style="color:#900;font-weight:bold">HTML</td><td>무엇을 보여줄지</td><td>🏗️ 벽, 바닥, 천장 (뼈대)</td></tr>
+        <tr><td style="color:#009;font-weight:bold">CSS</td><td>어떻게 보여줄지</td><td>🎨 벽지, 페인트, 인테리어</td></tr>
+        <tr><td style="color:#660;font-weight:bold">JavaScript</td><td>어떻게 동작할지</td><td>⚡ 전기, 수도, 엘리베이터</td></tr>
+      </tbody>
+    </table>
+
+    <!-- HTML -->
+    <div class="section-title">1. HTML — 화면의 뼈대</div>
+    <div class="tool-card">
+      <div class="tool-header">
+        <div class="tool-icon">🏗️</div>
+        <div>
+          <div class="tool-name">HTML (HyperText Markup Language)</div>
+          <div class="tool-sub">화면에 보이는 모든 요소를 만드는 언어</div>
+        </div>
+      </div>
+      <div class="tool-desc">
+        지뢰찾기의 칸, 버튼, 타이머 숫자, MHS 표 같은 것들이 모두 HTML로 만들어졌어요.<br>
+        꺾쇠괄호(&lt; &gt;)로 감싼 <b>태그</b>를 사용해서 요소를 정의해요.
+      </div>
+      <div class="tool-divider"></div>
+      <div style="font-size:11px;color:#555;margin-bottom:4px">실제 사용 예시 — 지뢰 칸 1개 만들기:</div>
+      <div class="code-block">
+        <span class="c-cmt">&lt;!-- 지뢰찾기 칸 하나 --&gt;</span><br>
+        <span class="c-tag">&lt;div</span> <span class="c-attr">class</span>=<span class="c-val">"cell"</span><span class="c-tag">&gt;</span><span class="c-white"> </span><span class="c-tag">&lt;/div&gt;</span><br><br>
+        <span class="c-cmt">&lt;!-- 타이머 LCD 화면 --&gt;</span><br>
+        <span class="c-tag">&lt;div</span> <span class="c-attr">class</span>=<span class="c-val">"lcd"</span> <span class="c-attr">id</span>=<span class="c-val">"timer"</span><span class="c-tag">&gt;</span><span class="c-white">000</span><span class="c-tag">&lt;/div&gt;</span><br><br>
+        <span class="c-cmt">&lt;!-- 검색 버튼 --&gt;</span><br>
+        <span class="c-tag">&lt;button</span> <span class="c-attr">onclick</span>=<span class="c-val">"doSearch()"</span><span class="c-tag">&gt;</span><span class="c-white">검색 시작</span><span class="c-tag">&lt;/button&gt;</span>
+      </div>
+      <div class="role-row">
+        <span class="role-badge rb-html">지뢰 칸 81개 생성</span>
+        <span class="role-badge rb-html">MHS 표 구조</span>
+        <span class="role-badge rb-html">버튼 배치</span>
+        <span class="role-badge rb-html">입력창</span>
+      </div>
+    </div>
+
+    <!-- CSS -->
+    <div class="section-title">2. CSS — 화면의 디자인</div>
+    <div class="tool-card">
+      <div class="tool-header">
+        <div class="tool-icon">🎨</div>
+        <div>
+          <div class="tool-name">CSS (Cascading Style Sheets)</div>
+          <div class="tool-sub">크기, 색깔, 테두리, 배치를 담당하는 언어</div>
+        </div>
+      </div>
+      <div class="tool-desc">
+        Windows XP 느낌의 회색 창, 빨간 LCD 숫자, 입체감 있는 테두리가 모두 CSS예요.<br>
+        CSS가 없으면 그냥 글자만 나열된 못생긴 화면이에요.
+      </div>
+      <div class="tool-divider"></div>
+      <div style="font-size:11px;color:#555;margin-bottom:4px">실제 사용 예시 — Windows XP 스타일 적용:</div>
+      <div class="code-block">
+        <span class="c-cmt">/* 지뢰 칸 스타일 */</span><br>
+        <span class="c-white">.cell {</span><br>
+        &nbsp;&nbsp;<span class="c-prop">width</span>: <span class="c-num">26px</span>;<br>
+        &nbsp;&nbsp;<span class="c-prop">height</span>: <span class="c-num">26px</span>;<br>
+        &nbsp;&nbsp;<span class="c-prop">background</span>: <span class="c-val">#d4d0c8</span>; <span class="c-cmt">/* XP 회색 */</span><br>
+        &nbsp;&nbsp;<span class="c-prop">border-color</span>: <span class="c-val">#fff #808080 #808080 #fff</span>; <span class="c-cmt">/* 입체 테두리 */</span><br>
+        <span class="c-white">}</span><br><br>
+        <span class="c-cmt">/* LCD 타이머 */</span><br>
+        <span class="c-white">.lcd {</span><br>
+        &nbsp;&nbsp;<span class="c-prop">background</span>: <span class="c-val">#000</span>;<br>
+        &nbsp;&nbsp;<span class="c-prop">color</span>: <span class="c-val">#f00</span>; <span class="c-cmt">/* 빨간 숫자 */</span><br>
+        &nbsp;&nbsp;<span class="c-prop">font-family</span>: <span class="c-val">'Courier New'</span>;<br>
+        <span class="c-white">}</span>
+      </div>
+      <div class="role-row">
+        <span class="role-badge rb-css">Windows XP 외관</span>
+        <span class="role-badge rb-css">빨간 LCD 숫자</span>
+        <span class="role-badge rb-css">입체 테두리</span>
+        <span class="role-badge rb-css">색상 강조</span>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <div class="section-title">3. JavaScript — 프로그램의 두뇌</div>
+    <div class="tool-card">
+      <div class="tool-header">
+        <div class="tool-icon">⚡</div>
+        <div>
+          <div class="tool-name">JavaScript</div>
+          <div class="tool-sub">실제 동작하는 모든 로직을 담당하는 언어</div>
+        </div>
+      </div>
+      <div class="tool-desc">
+        지뢰 배치, 타이머 작동, 칸 클릭 처리, 서브 검색, 값 수정까지<br>
+        프로그램의 모든 기능이 JavaScript로 작동해요.<br>
+        HTML·CSS가 아무리 예뻐도 JavaScript 없이는 아무것도 동작하지 않아요.
+      </div>
+      <div class="tool-divider"></div>
+      <div style="font-size:11px;color:#555;margin-bottom:4px">실제 사용 예시 — 타이머 작동:</div>
+      <div class="code-block">
+        <span class="c-cmt">// 1초마다 타이머 +1 증가</span><br>
+        <span class="c-kw">let</span> <span class="c-white">gTime = </span><span class="c-num">0</span><span class="c-white">;</span><br><br>
+        <span class="c-white">ticker = </span><span class="c-fn">setInterval</span><span class="c-white">(() => {</span><br>
+        &nbsp;&nbsp;<span class="c-white">gTime</span><span class="c-white">++;</span> <span class="c-cmt">// 1씩 증가</span><br>
+        &nbsp;&nbsp;<span class="c-fn">document.getElementById</span><span class="c-white">(</span><span class="c-str">"timer"</span><span class="c-white">)</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-white">.textContent = gTime;</span> <span class="c-cmt">// 화면에 표시</span><br>
+        <span class="c-white">}, </span><span class="c-num">1000</span><span class="c-white">);</span> <span class="c-cmt">// 1000ms = 1초</span>
+      </div>
+      <div class="role-row">
+        <span class="role-badge rb-js">타이머 작동</span>
+        <span class="role-badge rb-js">지뢰 랜덤 배치</span>
+        <span class="role-badge rb-js">칸 클릭 처리</span>
+        <span class="role-badge rb-js">서브 검색 로직</span>
+        <span class="role-badge rb-js">메모리 값 수정</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      세 언어 모두 설치 없이 브라우저만 있으면 바로 실행돼요 — 그래서 수업 자료로 활용하기 좋아요!
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
