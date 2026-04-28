@@ -5,149 +5,83 @@
 <title>코드 보안 실습 - 메모리 해킹</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: #008080;
-  font-family: Tahoma, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-/* XP Desktop 느낌 */
-.desktop {
-  width: 100%;
-  max-width: 600px;
-}
-
-/* 창 */
-.window {
-  border: 2px solid;
-  border-color: #dfdfdf #808080 #808080 #dfdfdf;
-  background: #d4d0c8;
-  margin-bottom: 16px;
-}
-.titlebar {
-  background: linear-gradient(to right, #0a246a, #a6caf0);
-  padding: 4px 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+body { background: #008080; font-family: Tahoma, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.window { border: 2px solid; border-color: #dfdfdf #808080 #808080 #dfdfdf; background: #d4d0c8; width: 100%; max-width: 600px; }
+.titlebar { background: linear-gradient(to right, #0a246a, #a6caf0); padding: 4px 6px; display: flex; align-items: center; justify-content: space-between; }
 .tlabel { color: #fff; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
 .tbtns { display: flex; gap: 2px; }
 .tbtn { width: 16px; height: 14px; font-size: 9px; border: 1px solid; border-color: #fff #808080 #808080 #fff; background: #d4d0c8; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .winbody { padding: 16px; }
+.main-title { font-size: 16px; font-weight: bold; color: #000080; margin-bottom: 4px; }
+.main-sub { font-size: 12px; color: #444; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #aaa; }
 
-/* 제목 */
-.main-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #000080;
-  margin-bottom: 4px;
-}
-.main-sub {
-  font-size: 12px;
-  color: #444;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #aaa;
-}
+/* 섹션 구분 */
+.section-label { font-size: 11px; color: #666; font-weight: bold; margin-bottom: 6px; margin-top: 14px; text-transform: uppercase; letter-spacing: 1px; }
+.section-label:first-of-type { margin-top: 0; }
 
-/* 카드 */
-.card-list { display: flex; flex-direction: column; gap: 10px; }
-.card {
-  border: 2px solid;
-  border-color: #fff #808080 #808080 #fff;
-  background: #ece9d8;
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  text-decoration: none;
-  color: #000;
-  transition: background 0.1s;
-}
+.card-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.card { border: 2px solid; border-color: #fff #808080 #808080 #fff; background: #ece9d8; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-decoration: none; color: #000; transition: background 0.1s; }
 .card:hover { background: #dde8f5; }
-.card:active { border-color: #808080 #fff #fff #808080; background: #ccd9ec; }
-.card-icon { font-size: 28px; flex-shrink: 0; }
+.card:active { border-color: #808080 #fff #fff #808080; }
+.card-icon { font-size: 26px; flex-shrink: 0; }
 .card-info { flex: 1; }
 .card-title { font-size: 13px; font-weight: bold; color: #000080; margin-bottom: 3px; }
 .card-desc { font-size: 11px; color: #555; line-height: 1.6; }
-.card-badge {
-  font-size: 10px;
-  padding: 2px 8px;
-  border: 1px solid #808080;
-  background: #d4d0c8;
-  color: #333;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
+.card-badge { font-size: 10px; padding: 2px 8px; border: 1px solid #808080; background: #d4d0c8; color: #333; white-space: nowrap; flex-shrink: 0; }
 .card-badge.new { background: #000080; color: #fff; border-color: #000080; }
+.card-badge.info { background: #005000; color: #fff; border-color: #005000; }
 
-/* 하단 */
-.footer {
-  font-size: 11px;
-  color: #666;
-  text-align: center;
-  margin-top: 8px;
-  padding-top: 10px;
-  border-top: 1px solid #aaa;
-}
+.divider { height: 1px; background: #aaa; margin: 14px 0; }
+
+.footer { font-size: 11px; color: #666; text-align: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid #aaa; }
 </style>
 </head>
 <body>
-<div class="desktop">
-
-  <div class="window">
-    <div class="titlebar">
-      <div class="tlabel">🔐 코드 보안 실습 — 메모리 해킹 체험</div>
-      <div class="tbtns">
-        <div class="tbtn">_</div>
-        <div class="tbtn">□</div>
-        <div class="tbtn">✕</div>
-      </div>
-    </div>
-    <div class="winbody">
-      <div class="main-title">메모리 해킹 실습 프로그램</div>
-      <div class="main-sub">실습할 프로그램을 선택하세요. 지뢰찾기 타이머를 직접 조작하며 메모리 해킹의 원리를 체험합니다.</div>
-
-      <div class="card-list">
-
-        <a class="card" href="minesweeper.html">
-          <div class="card-icon">💣</div>
-          <div class="card-info">
-            <div class="card-title">지뢰찾기 메모리 해킹 실습 (기본)</div>
-            <div class="card-desc">
-              실제로 플레이 가능한 지뢰찾기 + MHS 도구 체험<br>
-              4단계로 타이머 주소를 찾고 값을 직접 수정해보세요
-            </div>
-          </div>
-          <div class="card-badge">기본</div>
-        </a>
-
-        <a class="card" href="minesweeper_v2.html">
-          <div class="card-icon">🔬</div>
-          <div class="card-info">
-            <div class="card-title">지뢰찾기 메모리 해킹 실습 (심화)</div>
-            <div class="card-desc">
-              각 메모리 주소에 어떤 값이 저장되는지 확인 가능<br>
-              타이머·깃발수·열린칸·빈공간을 비교하며 이해
-            </div>
-          </div>
-          <div class="card-badge new">심화</div>
-        </a>
-
-      </div>
-
-      <div class="footer">
-        대학 교양 | 정보보안 입문 — 코드 보안 5장 실습자료
-      </div>
-    </div>
+<div class="window">
+  <div class="titlebar">
+    <div class="tlabel">🔐 코드 보안 실습 — 메모리 해킹 체험</div>
+    <div class="tbtns"><div class="tbtn">_</div><div class="tbtn">□</div><div class="tbtn">✕</div></div>
   </div>
+  <div class="winbody">
+    <div class="main-title">메모리 해킹 실습 프로그램</div>
+    <div class="main-sub">실습할 프로그램을 선택하세요. 지뢰찾기 타이머를 직접 조작하며 메모리 해킹의 원리를 체험합니다.</div>
 
+    <div class="section-label">🎮 실습 프로그램</div>
+    <div class="card-list">
+      <a class="card" href="minesweeper.html">
+        <div class="card-icon">💣</div>
+        <div class="card-info">
+          <div class="card-title">지뢰찾기 메모리 해킹 (기본)</div>
+          <div class="card-desc">실제 플레이 가능한 지뢰찾기 + MHS 도구 체험<br>4단계로 타이머 주소를 찾고 값을 직접 수정</div>
+        </div>
+        <div class="card-badge">기본</div>
+      </a>
+      <a class="card" href="minesweeper_v2.html">
+        <div class="card-icon">🔬</div>
+        <div class="card-info">
+          <div class="card-title">지뢰찾기 메모리 해킹 (심화)</div>
+          <div class="card-desc">각 메모리 주소에 어떤 값이 저장되는지 확인<br>타이머·깃발수·열린칸·빈공간을 비교하며 이해</div>
+        </div>
+        <div class="card-badge new">심화</div>
+      </a>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-label">📖 참고 자료</div>
+    <div class="card-list">
+      <a class="card" href="about.html">
+        <div class="card-icon">💻</div>
+        <div class="card-info">
+          <div class="card-title">제작 도구 소개 — HTML / CSS / JavaScript</div>
+          <div class="card-desc">이 실습 프로그램을 만든 3가지 언어를 소개해요<br>코드 예시와 함께 각 언어의 역할을 쉽게 설명</div>
+        </div>
+        <div class="card-badge info">소개</div>
+      </a>
+    </div>
+
+    <div class="footer">DataSecurity — 코드 보안 5장 실습자료</div>
+  </div>
 </div>
 </body>
 </html>
