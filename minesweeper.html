@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>지뢰찾기 메모리 해킹 실습</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #008080; font-family: 'MS Sans Serif', Tahoma, sans-serif; font-size: 12px; padding: 8px; }
+
+/* XP Window */
+.window { border: 2px solid; border-color: #dfdfdf #808080 #808080 #dfdfdf; background: #d4d0c8; margin-bottom: 8px; }
+.titlebar { background: linear-gradient(to right, #0a246a, #a6caf0); padding: 3px 4px; display: flex; align-items: center; justify-content: space-between; }
+.titlebar-left { display: flex; align-items: center; gap: 4px; color: white; font-size: 11px; font-weight: bold; }
+.titlebar-icon { width: 14px; height: 14px; }
+.titlebar-btns { display: flex; gap: 2px; }
+.tbtn { width: 16px; height: 14px; font-size: 10px; border: 1px solid; border-color: #fff #808080 #808080 #fff; background: #d4d0c8; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #000; }
+.winbody { padding: 6px; }
+
+/* Minesweeper */
+.mine-hdr { background: #d4d0c8; border: 2px solid; border-color: #808080 #fff #fff #808080; padding: 4px 6px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+.lcd { background: #000; color: #f00; font-family: 'Courier New', monospace; font-size: 20px; font-weight: bold; padding: 2px 4px; min-width: 52px; text-align: right; letter-spacing: 2px; border: 2px inset #808080; }
+.face-btn { width: 30px; height: 28px; background: #d4d0c8; border: 2px solid; border-color: #fff #808080 #808080 #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+.face-btn:active { border-color: #808080 #fff #fff #808080; }
+.mine-board { display: inline-grid; grid-template-columns: repeat(9, 26px); border: 2px solid; border-color: #808080 #fff #fff #808080; }
+.cell { width: 26px; height: 26px; background: #d4d0c8; border: 2px solid; border-color: #fff #808080 #808080 #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; cursor: pointer; font-family: 'Courier New', monospace; user-select: none; }
+.cell:active { border-color: #808080; background: #bbb; }
+.cell.open { border: 1px solid #aaa; background: #c8c8c8; cursor: default; font-size: 13px; }
+.cell.flag { color: #f00; font-size: 14px; }
+.cell.boom { background: #f00; }
+.n1{color:#0000ff}.n2{color:#007b00}.n3{color:#ff0000}.n4{color:#00007b}.n5{color:#7b0000}.n6{color:#007b7b}.n7{color:#000000}.n8{color:#7b7b7b}
+
+/* Guide box */
+.guide { background: #fffbe0; border: 1px solid #c8a000; padding: 6px 10px; margin-bottom: 6px; font-size: 12px; color: #4a3000; line-height: 1.7; }
+.guide b { color: #000; }
+.guide .action { display: inline-block; background: #000080; color: #fff; padding: 1px 8px; margin: 0 2px; font-size: 11px; }
+
+/* Steps */
+.steps { display: flex; gap: 2px; margin-bottom: 6px; flex-wrap: wrap; }
+.step { padding: 2px 10px; border: 1px solid #808080; background: #d4d0c8; color: #888; font-size: 11px; }
+.step.active { background: #000080; color: #fff; border-color: #000080; }
+.step.done { background: #90c090; color: #003000; border-color: #509050; }
+
+/* MHS */
+.mhs-panel { border: 1px solid #808080; margin-bottom: 5px; }
+.mhs-title { background: #000080; color: #fff; font-size: 11px; font-weight: bold; padding: 2px 6px; }
+.mhs-body { padding: 5px; }
+.mhs-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
+.mhs-lbl { font-size: 11px; color: #000; min-width: 70px; }
+.mhs-inp { border: 2px inset #808080; padding: 2px 4px; font-size: 11px; font-family: 'Courier New', monospace; background: #fff; color: #000; width: 72px; }
+.mhs-btn { background: #d4d0c8; border: 2px solid; border-color: #fff #808080 #808080 #fff; padding: 2px 10px; font-size: 11px; cursor: pointer; color: #000; white-space: nowrap; }
+.mhs-btn:hover { background: #e0e0e0; }
+.mhs-btn:active { border-color: #808080 #fff #fff #808080; }
+.mhs-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.mhs-tbl { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Courier New', monospace; }
+.mhs-tbl th { background: #000080; color: #fff; padding: 2px 5px; text-align: left; font-weight: normal; font-size: 11px; }
+.mhs-tbl td { padding: 2px 5px; border-bottom: 1px solid #e0e0e0; color: #000; }
+.mhs-tbl tr.candidate td { background: #ffffc0; }
+.mhs-tbl tr.removed td { color: #bbb; text-decoration: line-through; }
+.mhs-tbl tr.found td { background: #90ff90; font-weight: bold; }
+.scroll-tbl { max-height: 130px; overflow-y: auto; border: 1px inset #808080; }
+.mhs-log { background: #000; color: #0f0; font-family: 'Courier New', monospace; font-size: 11px; padding: 4px; height: 72px; overflow-y: auto; margin-top: 4px; }
+.mhs-log .warn { color: #ff0; }
+.mhs-log .err { color: #f00; }
+</style>
+</head>
+<body>
+
+<!-- Guide -->
+<div class="guide" id="guide">
+  <b>📌 1단계:</b> 지뢰찾기 칸을 <span class="action">클릭</span> 해서 게임을 시작하세요. 타이머가 올라가기 시작합니다.
+</div>
+<div class="steps">
+  <div class="step active" id="st0">1. 게임 시작</div>
+  <div class="step" id="st1">2. 메모리 검색</div>
+  <div class="step" id="st2">3. 범위 좁히기</div>
+  <div class="step" id="st3">4. 값 수정</div>
+</div>
+
+<!-- Minesweeper Window -->
+<div class="window">
+  <div class="titlebar">
+    <div class="titlebar-left">💣 지뢰찾기</div>
+    <div class="titlebar-btns">
+      <div class="tbtn">_</div><div class="tbtn">□</div><div class="tbtn" onclick="resetGame()">✕</div>
+    </div>
+  </div>
+  <div class="winbody">
+    <div class="mine-hdr">
+      <div class="lcd" id="lcd-mines">010</div>
+      <div class="face-btn" id="face" onclick="resetGame()">🙂</div>
+      <div class="lcd" id="lcd-timer">000</div>
+    </div>
+    <div class="mine-board" id="board"></div>
+  </div>
+</div>
+
+<!-- MHS Window -->
+<div class="window">
+  <div class="titlebar">
+    <div class="titlebar-left">🔧 Memory Hacking Software — [Winmine_XP.exe]</div>
+    <div class="titlebar-btns">
+      <div class="tbtn">_</div><div class="tbtn">□</div><div class="tbtn">✕</div>
+    </div>
+  </div>
+  <div class="winbody">
+
+    <div class="mhs-panel">
+      <div class="mhs-title">메모리 검색</div>
+      <div class="mhs-body">
+        <div class="mhs-row">
+          <span class="mhs-lbl">검색 값:</span>
+          <input class="mhs-inp" id="sval" value="0" type="number" min="0">
+          <button class="mhs-btn" id="sbtn" onclick="doSearch()" disabled>검색 시작</button>
+          <button class="mhs-btn" id="subbtn" onclick="doSub()" disabled>서브 검색</button>
+        </div>
+        <div class="mhs-row">
+          <span class="mhs-lbl">결과 수:</span>
+          <span id="rcnt" style="font-family:'Courier New',monospace">-</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mhs-panel">
+      <div class="mhs-title">검색 결과</div>
+      <div class="scroll-tbl">
+        <table class="mhs-tbl">
+          <thead><tr><th>주소</th><th>이전 값</th><th>현재 값</th><th>상태</th></tr></thead>
+          <tbody id="rtbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mhs-panel" id="modpanel" style="opacity:0.4">
+      <div class="mhs-title">값 수정 (타이머 조작)</div>
+      <div class="mhs-body">
+        <div class="mhs-row">
+          <span class="mhs-lbl">타겟 주소:</span>
+          <span id="taddr" style="font-family:'Courier New',monospace;font-size:11px">-</span>
+        </div>
+        <div class="mhs-row">
+          <span class="mhs-lbl">새 값:</span>
+          <input class="mhs-inp" id="nval" value="1" type="number" min="0" max="999">
+          <button class="mhs-btn" id="modbtn" onclick="doModify()" disabled>값 쓰기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mhs-log" id="mlog"></div>
+  </div>
+</div>
+
+<script>
+const ROWS = 9, COLS = 9, TOTAL = 81, MINE_N = 10;
+const ALL_ADDR = [
+  "0x00403A10","0x00403B44","0x00404C22","0x7FFD0018","0x00403D88",
+  "0x7FFD0044","0x00405120","0x7FFD0088","0x00403F60","0x7FFE0010",
+  "0x00406244","0x7FFE0020","0x00403A90","0x7FFF0100","0x00407888",
+  "0x7FFF0200","0x00403C14","0x7FFF0300","0x00408010","0x7FFF0400"
+];
+const TARGET = "0x00403B44";
+const FILTER = [
+  ALL_ADDR,
+  ["0x00403A10","0x00403B44","0x00404C22","0x00403D88","0x00403F60"],
+  ["0x00403B44","0x00404C22"],
+  ["0x00403B44"]
+];
+
+let cells = [], mines = new Set(), revealed = new Set(), flagged = new Set();
+let state = "idle", gTime = 0, ticker = null;
+let searched = false, fRound = 0, prevT = 0;
+
+function mlog(msg, cls) {
+  const el = document.getElementById("mlog");
+  const d = document.createElement("div");
+  if (cls) d.className = cls;
+  d.textContent = "> " + msg;
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
+}
+
+function setStep(n) {
+  ["st0","st1","st2","st3"].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = "step" + (i < n ? " done" : i === n ? " active" : "");
+  });
+}
+
+function setGuide(html) {
+  document.getElementById("guide").innerHTML = html;
+}
+
+function initBoard() {
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+  cells = [];
+  mines.clear(); revealed.clear(); flagged.clear();
+  for (let i = 0; i < TOTAL; i++) {
+    const c = document.createElement("div");
+    c.className = "cell";
+    c.addEventListener("click", () => onLeft(i));
+    c.addEventListener("contextmenu", e => { e.preventDefault(); onRight(i); });
+    board.appendChild(c);
+    cells.push(c);
+  }
+  document.getElementById("lcd-mines").textContent = "010";
+  document.getElementById("lcd-timer").textContent = "000";
+  document.getElementById("face").textContent = "🙂";
+}
+
+function placeMines(skip) {
+  mines.clear();
+  while (mines.size < MINE_N) {
+    const r = Math.floor(Math.random() * TOTAL);
+    if (r !== skip) mines.add(r);
+  }
+}
+
+function neighbors(i) {
+  const r = Math.floor(i / COLS), c = i % COLS, res = [];
+  for (let dr = -1; dr <= 1; dr++)
+    for (let dc = -1; dc <= 1; dc++) {
+      if (!dr && !dc) continue;
+      const nr = r+dr, nc = c+dc;
+      if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS)
+        res.push(nr * COLS + nc);
+    }
+  return res;
+}
+
+function adj(i) { return neighbors(i).filter(n => mines.has(n)).length; }
+
+function reveal(i) {
+  if (revealed.has(i) || flagged.has(i)) return;
+  revealed.add(i);
+  const c = cells[i];
+  c.className = "cell open";
+  if (mines.has(i)) { c.textContent = "💣"; c.classList.add("boom"); return; }
+  const n = adj(i);
+  if (n > 0) { c.textContent = n; c.classList.add("n" + n); }
+  else neighbors(i).forEach(nb => reveal(nb));
+}
+
+function onLeft(i) {
+  if (state === "dead" || state === "won") return;
+  if (flagged.has(i)) return;
+
+  if (state === "idle") {
+    state = "playing";
+    placeMines(i);
+    startTicker();
+    document.getElementById("sbtn").disabled = false;
+    setGuide("<b>📌 2단계:</b> 타이머가 올라가고 있어요! MHS에서 <span class='action'>검색 시작</span> 버튼을 눌러 메모리를 검색하세요.");
+    setStep(1);
+    mlog("Winmine_XP.exe 감지됨 — 타이머 시작", "warn");
+    mlog("검색 시작 버튼을 누르세요");
+  }
+
+  if (mines.has(i)) {
+    state = "dead";
+    stopTicker();
+    mines.forEach(m => { if (!flagged.has(m)) { cells[m].className = "cell open"; cells[m].textContent = "💣"; } });
+    cells[i].classList.add("boom");
+    document.getElementById("face").textContent = "😵";
+    setGuide("<b>💥 지뢰!</b> 게임 오버입니다. 😵 버튼이나 ✕ 버튼을 눌러 다시 시작하세요.");
+    return;
+  }
+
+  reveal(i);
+  const safe = TOTAL - MINE_N;
+  if (revealed.size === safe) {
+    state = "won";
+    stopTicker();
+    document.getElementById("face").textContent = "😎";
+    setGuide("<b>🎉 클리어!</b> 기록: " + gTime + "초<br>MHS에서 값을 <b>1</b>로 바꿔 기록을 조작해보세요!");
+  }
+}
+
+function onRight(i) {
+  if (state !== "playing") return;
+  if (revealed.has(i)) return;
+  if (flagged.has(i)) {
+    flagged.delete(i);
+    cells[i].textContent = "";
+    cells[i].className = "cell";
+  } else {
+    flagged.add(i);
+    cells[i].textContent = "🚩";
+    cells[i].className = "cell flag";
+  }
+  document.getElementById("lcd-mines").textContent =
+    String(MINE_N - flagged.size).padStart(3, "0");
+}
+
+function startTicker() {
+  gTime = 0;
+  ticker = setInterval(() => {
+    if (gTime < 999) gTime++;
+    document.getElementById("lcd-timer").textContent = String(gTime).padStart(3, "0");
+  }, 1000);
+}
+
+function stopTicker() { if (ticker) { clearInterval(ticker); ticker = null; } }
+
+function resetGame() {
+  stopTicker();
+  state = "idle"; gTime = 0;
+  searched = false; fRound = 0; prevT = 0;
+  document.getElementById("sbtn").disabled = true;
+  document.getElementById("subbtn").disabled = true;
+  document.getElementById("modbtn").disabled = true;
+  document.getElementById("modpanel").style.opacity = "0.4";
+  document.getElementById("rtbody").innerHTML = "";
+  document.getElementById("rcnt").textContent = "-";
+  document.getElementById("taddr").textContent = "-";
+  document.getElementById("mlog").innerHTML = "";
+  initBoard();
+  setStep(0);
+  setGuide("<b>📌 1단계:</b> 지뢰찾기 칸을 <span class='action'>클릭</span> 해서 게임을 시작하세요. 타이머가 올라가기 시작합니다.");
+}
+
+function doSearch() {
+  if (state === "idle") { mlog("게임을 먼저 시작하세요", "err"); return; }
+  prevT = gTime;
+  const tbody = document.getElementById("rtbody");
+  tbody.innerHTML = "";
+  ALL_ADDR.forEach(a => {
+    const tr = document.createElement("tr");
+    tr.className = "candidate";
+    tr.innerHTML = `<td>${a}</td><td>${prevT}</td><td>${prevT}</td><td>후보</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById("rcnt").textContent = ALL_ADDR.length + "개";
+  document.getElementById("subbtn").disabled = false;
+  document.getElementById("sbtn").disabled = true;
+  searched = true; fRound = 0;
+  mlog("검색 완료: " + ALL_ADDR.length + "개 주소 발견 (값=" + prevT + ")");
+  mlog("서브 검색으로 범위를 좁혀보세요", "warn");
+  setGuide("<b>📌 3단계:</b> " + ALL_ADDR.length + "개 주소를 찾았어요. 타이머가 조금 더 올라가면 <span class='action'>서브 검색</span> 을 눌러 범위를 좁히세요.");
+  setStep(2);
+}
+
+function doSub() {
+  if (!searched) { mlog("먼저 검색을 실행하세요", "err"); return; }
+  fRound++;
+  const oldT = prevT;
+  prevT = gTime;
+  const prev = FILTER[Math.min(fRound - 1, FILTER.length - 1)];
+  const curr = FILTER[Math.min(fRound, FILTER.length - 1)];
+  const tbody = document.getElementById("rtbody");
+  tbody.innerHTML = "";
+  prev.forEach(a => {
+    const alive = curr.includes(a);
+    const isTarget = a === TARGET && curr.length === 1;
+    const curVal = alive ? prevT : oldT; // 제거된 주소는 값이 그대로
+    const tr = document.createElement("tr");
+    tr.className = isTarget ? "found" : alive ? "candidate" : "removed";
+    tr.innerHTML = `<td>${a}</td><td>${oldT}</td><td>${curVal}</td>
+      <td>${alive ? (isTarget ? "★ 타이머 확정!" : "바뀜 — 유지") : "그대로 — 제거"}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById("rcnt").textContent = curr.length + "개 남음";
+  mlog("서브 검색 " + fRound + "회: " + prev.length + "개 → " + curr.length + "개");
+
+  if (curr.length === 1) {
+    document.getElementById("taddr").textContent = TARGET;
+    document.getElementById("modpanel").style.opacity = "1";
+    document.getElementById("modbtn").disabled = false;
+    document.getElementById("subbtn").disabled = true;
+    mlog("★ 타이머 주소 확정: " + TARGET, "warn");
+    setGuide("<b>📌 4단계:</b> 타이머 주소를 찾았어요! 새 값을 <b>1</b> 로 입력하고 <span class='action'>값 쓰기</span> 를 눌러 기록을 조작해보세요!");
+    setStep(3);
+  } else if (curr.length <= 2) {
+    mlog("거의 다 왔어요! 한 번만 더 서브 검색하세요", "warn");
+    setGuide("<b>📌 거의 다 왔어요!</b> " + curr.length + "개 남았어요. <span class='action'>서브 검색</span> 한 번 더!");
+  } else {
+    mlog("계속 서브 검색으로 좁혀가세요", "warn");
+    setGuide("<b>📌 " + curr.length + "개로 줄었어요!</b> 계속 <span class='action'>서브 검색</span> 을 눌러 더 좁히세요.");
+  }
+}
+
+function doModify() {
+  const v = parseInt(document.getElementById("nval").value);
+  if (isNaN(v) || v < 0 || v > 999) { mlog("0~999 사이 값을 입력하세요", "err"); return; }
+  stopTicker();
+  gTime = v;
+  const lcdEl = document.getElementById("lcd-timer");
+  lcdEl.textContent = String(v).padStart(3, "0");
+  if (state === "playing" || state === "won")
+    document.getElementById("face").textContent = "😈";
+  mlog("★ 해킹 성공! 타이머 = " + v + "초로 변조!", "warn");
+  let fl = 0;
+  const fi = setInterval(() => {
+    lcdEl.style.color = fl % 2 === 0 ? "#ff0" : "#f00";
+    if (++fl > 7) { clearInterval(fi); lcdEl.style.color = "#f00"; }
+  }, 150);
+  const msg = v <= 3
+    ? "<b>😈 해킹 완료!</b> " + v + "초 기록! 실제라면 세계 1위 기록이에요.<br>코드를 건드리지 않고 메모리 값만 바꿨습니다 — 이것이 메모리 해킹의 원리!"
+    : "<b>😈 해킹 완료!</b> 타이머가 " + v + "초로 변조되었어요.<br>코드를 건드리지 않고 메모리 주소 " + TARGET + " 의 값만 직접 바꿨습니다.";
+  setGuide(msg);
+}
+
+// Init
+initBoard();
+</script>
+</body>
+</html>
